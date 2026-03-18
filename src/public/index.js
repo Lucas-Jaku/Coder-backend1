@@ -1,65 +1,36 @@
-const socketClient = io();
+const socket = io();
+let user;
 
-let username = null;
-
-if (!username) {
-  Swal.fire({
-    title: "Bienvenido al chat",
-    text: "Ingresá tu nombre de usuario",
+// Pedimos el nombre de usuario al cargar la página
+Swal.fire({
+    title: "Identifícate",
     input: "text",
-    inputValidator: (value) => {
-      if (!value) return "El nombre de usuario es requerido";
-    },
-  }).then((result) => {
-    username = result.value;
-    socketClient.emit("newUser", username);
-  });
-}
-
-const message = document.getElementById("message");
-const btn = document.getElementById("send");
-const output = document.getElementById("output");
-const actions = document.getElementById("actions");
-
-btn.addEventListener("click", () => {
-  socketClient.emit("message", {
-    username,
-    message: message.value,
-  });
-  message.value = "";
+    text: "Ingresa tu nombre de usuario para el chat",
+    inputValidator: (value) => !value && "¡Necesitas un nombre!",
+    allowOutsideClick: false
+}).then(result => {
+    user = result.value;
+    socket.emit('newUser', user);
 });
 
-socketClient.on("messages", (data) => {
-  actions.innerHTML = "";
-  output.innerHTML = data
-    .map((msg) => {
-      return `<p><strong>${msg.username}: </strong> ${msg.message}</p>`;
-    })
-    .join(" ");
+
+// --- REALTIME CHAT ---
+const chatInput = document.getElementById('message');
+const sendBtn = document.getElementById('send');
+
+
+sendBtn.addEventListener('click', () => {
+    const messageText = chatInput.value.trim();
+    if (messageText.length > 0) {
+        // Enviamos 'user' (el que guardaste al inicio) y 'message'
+        socket.emit('message', { user: 'nombre', message: 'texto' });
+        chatInput.value = '';
+    }
 });
 
-socketClient.on("newUser", (username) => {
-  Toastify({
-    text: `${username} se ha unido al chat`,
-    duration: 3000,
-    // destination: "https://github.com/apvarun/toastify-js",
-    // newWindow: true,
-    close: true,
-    gravity: "top", // `top` or `bottom`
-    position: "left", // `left`, `center` or `right`
-    stopOnFocus: true, // Prevents dismissing of toast on hover
-    style: {
-      background: "linear-gradient(to right, #00b09b, #96c93d)",
-    },
-    onClick: function () {}, // Callback after click
-  }).showToast();
+// Escuchamos los mensajes actualizados desde el servidor
+socket.on('messages', (messages) => {
+    const chatBox = document.getElementById('chatBox');
+    chatBox.innerHTML = messages.map(m => `<p><strong>${m.user}</strong>: ${m.message}</p>`).join('');
 });
-
-message.addEventListener('keypress', ()=>{
-    socketClient.emit('typing', username);
-})
-
-socketClient.on('typing', (username)=>{
-    actions.innerHTML = `<p><em>${username} está escribiendo...</em></p>`
-})
 

@@ -1,0 +1,10 @@
+<h1>Lista de Productos Estática</h1>
+<div class="product-container">
+    {{#each products}}
+        <div class="product-card">
+            <h3>{{this.title}}</h3>
+            <p>Precio: ${{this.price}}</p>
+            <p>ID: {{this.id}}</p>
+        </div>
+    {{/each}}
+</div>
