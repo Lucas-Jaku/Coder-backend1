@@ -1,45 +1,54 @@
-import { ProductModel } from "../models/product-model.js";
+import ProductModel from "../models/product-model.js";
 
 class ProductRepository {
-  constructor(model) {
-    this.model = model;
-  }
+    constructor() {
+        this.model = ProductModel;
+    }
 
-  getAll = async () => {
-    try {
-      return await this.model.find();
-    } catch (error) {
-      throw new Error(error);
-    }
-  };
-  getById = async (id) => {
-    try {
-      return await this.model.findById(id); //findOne({_id: id})
-    } catch (error) {
-      throw new Error(error);
-    }
-  };
-  create = async (body) => {
-    try {
-      return await this.model.create(body); //insertOne
-    } catch (error) {
-      throw new Error(error);
-    }
-  };
-  update = async (id, body) => {
-    try {
-      return await this.model.findByIdAndUpdate(id, body, { new: true }); //updateOne $set
-    } catch (error) {
-      throw new Error(error);
-    }
-  };
-  delete = async (id) => {
-    try {
-      return await this.model.findByIdAndDelete(id); //deleteOne
-    } catch (error) {
-      throw new Error(error);
-    }
-  };
+    getAll = async (page = 1, limit = 10) => {
+        try {
+            
+            if (this.model.paginate) {
+                return await this.model.paginate({}, { page, limit });
+            }
+            
+            return await this.model.find().skip((page - 1) * limit).limit(limit);
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    };
+
+    getById = async (id) => {
+        try {
+            return await this.model.findById(id);
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    };
+
+    create = async (body) => {
+        try {
+            return await this.model.create(body);
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    };
+
+    update = async (id, body) => {
+        try {
+            return await this.model.findByIdAndUpdate(id, body, { new: true });
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    };
+
+    delete = async (id) => {
+        try {
+            return await this.model.findByIdAndDelete(id);
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    };
 }
 
-export const productRepository = new ProductRepository(ProductModel);
+export default new ProductRepository();
