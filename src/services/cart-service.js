@@ -2,6 +2,7 @@ import cartRepository from '../repositories/cart-repository.js';
 import productRepository from '../repositories/product-repository.js';
 
 class CartService {
+    
     async addProductToCart(userId, productId, quantity) {
         //Validar que el producto existe en Mongo
         const product = await productRepository.getById(productId); 
@@ -30,8 +31,25 @@ class CartService {
         return await cartRepository.save(cart);
     }
 
+
     async getCartByUserId(userId) {
         return await cartRepository.getCartByUserId(userId);
+    }
+
+    async removeProduct(cid, pid) {
+        return await cartRepository.removeProduct(cid, pid);
+    }
+
+    async updateCart(cid, products) {
+        return await cartRepository.updateCart(cid, products);
+    }
+
+    async updateQuantity(cid, pid, quantity) {
+        return await cartRepository.updateQuantity(cid, pid, quantity);
+    }
+
+    async clearCart(cid) {
+        return await cartRepository.clearCart(cid);
     }
 }
 
